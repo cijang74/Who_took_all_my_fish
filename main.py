@@ -19,6 +19,14 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 test_image = pygame.image.load("images/이미지 이름.png").convert() # 이미지
 fishing_music = pygame.mixer.Sound('sounds/사운드 이름.wav') # 사운드
 
+# 변수
+test = 0
+
+# 클래스
+class Test():
+    def test(self):
+        pass
+
 # 이벤트 루프
 running = True # running이 참일때 게임은 실행중
 
