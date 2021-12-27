@@ -10,12 +10,13 @@ pygame.init() #파이게임 초기화
 screen_width = 1920 # 가로크기
 screen_height = 1080 # 세로크기
 RGB = ((22, 255, 255))
+RGB2 = ((0,255,0))
 
 #게임 크기
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 #게임이름
-pygame.display.set_caption('게임 이름')
+pygame.display.set_caption("누가 내 물고기 다 가져갔어?")
 
 #FPS
 clock = pygame.time.Clock()
@@ -68,9 +69,11 @@ clearscreen_image = pygame.image.load('images/clear.png').convert()
 howtoplay_image = pygame.image.load('images/How_to_play.png').convert()
 
 start_image = pygame.image.load('images/start.png').convert()
+start_image.set_colorkey(RGB2)
 start_rect = start_image.get_rect()
 
 end_image = pygame.image.load('images/end.png').convert()
+end_image.set_colorkey(RGB2)
 end_rect = end_image.get_rect()
 
 replay_image = pygame.image.load('images/replay.png').convert()
@@ -234,8 +237,9 @@ e_missile_speed = 8 #포탑 샷스피드
 fire_range = 50 #포탑 공격 사거리
 
 #사운드 불러오기
-shot_sound = pygame.mixer.Sound('sounds/shot.wav')
-walk_sound = pygame.mixer.Sound('sounds/walk.wav')
+shot_sound = pygame.mixer.Sound('sounds/휘두르는소리.wav')
+walk_sound = pygame.mixer.Sound('sounds/걷는소리.wav')
+broken_sound = pygame.mixer.Sound('sounds/깨지는소리.wav')
 treasure_sound = pygame.mixer.Sound('sounds/treasure.wav')
 portal_sound = pygame.mixer.Sound('sounds/portal.wav')
 stage_music = pygame.mixer.Sound('sounds/stage_music.wav')
@@ -844,12 +848,12 @@ class Stage: #스테이지 클래스
 
     def homescreen(self): #게임 메인화면(시작화면)
         screen.blit(homescreen_image, (self.x, self.y))
-        Button(start_image,610,820,313,97,start_image,610,820,'start')
-        Button(end_image,1180,820,313,97,end_image,1180,820,'end')
+        Button(start_image,1500,200,300,150,start_image,1500,200,'start')
+        Button(end_image,1500,420,300,150,end_image,1500,420,'end')
 
     def clearscreen(self): #게임 클리어 화면
         screen.blit(clearscreen_image, (self.x, self.y))
-        Button(replay_image,210,520,313,97,replay_image,210,520,'replay')
+        Button(replay_image,210,300,313,97,replay_image,210,300,'replay')
         Button(end_image,780,520,313,97,end_image,780,520,'end')
 
     #스테이지 편하게 만들기 위한 함수들
@@ -1245,16 +1249,6 @@ while 1:
                     stop = time.time()
                 spawn = True
         ####################################
-
-        spawn = True
-        if stage == 7 and t < len(textboxs):
-            textboxs[t].draw()
-            istext_on = True
-            spawn = False
-            if pressed_keys[K_z]:
-                if (time.time() - stop) > character.attac_speed:
-                    del textboxs[t]
-                    stop = time.time()
 
         #스테이지 안내형 텍스트 박스 관련
         if stage == 2:
