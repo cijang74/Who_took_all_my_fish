@@ -61,7 +61,7 @@ boss_image = pygame.image.load('images/boss.png').convert()
 boss_image.set_colorkey((255, 255, 255))
 
 wall_normal = pygame.image.load('images/wall_normal.png').convert()
-wall_normal = pygame.transform.scale(wall_normal, (85, 85))
+wall_normal = pygame.transform.scale(wall_normal, (80, 80))
 wall_broken = pygame.image.load('images/wall_broken.png').convert()
 wall_broken.set_colorkey((255, 255, 255))
 
@@ -260,25 +260,37 @@ class Character: #플레이어 클래스
         wallCount = 0
         if(stage >= 1):
             for wallCount in range(len(walls)):
-                if ((character.top < walls[wallCount].bottom) and (walls[wallCount].top < character.bottom)) and ((character.left < walls[wallCount].right) and (walls[wallCount].left < character.right)) and (self.switch == False):
-                    print("test")
-                    self.canMove_R = False
+                character.check()
+
+                if walls[wallCount].top <= character.bottom and walls[wallCount].bottom >= character.bottom and character.right > walls[wallCount].left and character.left < walls[wallCount].right:
+                    self.canMove_R = True
+                    self.canMove_L = True
+                    self.canMove_U = True
+                    self.canMove_D = False
+                    character.y = walls[wallCount].top - 200
+                    break
+
+                elif walls[wallCount].right >= character.left and walls[wallCount].left < character.left and (walls[wallCount].top  < character.bottom or walls[wallCount].bottom  < character.top):
+                    self.canMove_R = True
                     self.canMove_L = False
                     self.canMove_U = False
-                    self.canMove_D = False
-
-                    if(self.lastInput == 1 and self.backCount == 0):
-                        self.canMove_R == True
-
-                    if(self.lastInput == 2 and self.backCount == 0):
-                        self.canMove_L == True
+                    self.canMove_D = True
                     break
-                
+                    
+
+                elif walls[wallCount].left <= character.right and walls[wallCount].right > character.right and (walls[wallCount].top  < character.bottom or walls[wallCount].bottom  < character.top):
+                    self.canMove_R = False
+                    self.canMove_L = True
+                    self.canMove_U = False
+                    self.canMove_D = True
+                    break
+                    
                 else:
                     self.canMove_R = True
                     self.canMove_L = True
                     self.canMove_U = True
                     self.canMove_D = True
+
                 
         if len(walls) == 0: # 마지막 벽이 깨질 때 벽에 붙어 있으면 이후 위의 for문이 안돌아 다시 self.canMove를 True로 돌리는 코드가 없었음, 또 다른 버그 생길 수도 있음
             self.canMove_L = True
@@ -315,6 +327,7 @@ class Character: #플레이어 클래스
 
         if pressed_keys[K_x] and self.canMove_U == True:
             if istext_on == False:
+                self.lastInput = 3
 
                 if character.isJump == 2:
                     character.jump(1)
@@ -375,6 +388,13 @@ class Character: #플레이어 클래스
             elif self.canMove_D == False:
                 self.isJump = 0
                 self.v = 7
+
+    def check(self):
+        self.top = self.y
+        self.left = self.x
+        self.bottom = self.y + 200
+        self.right = self.x + 125
+
 
     def draw(self): #그리기(각도에 따라 로테이션 해줌)
         global last
@@ -581,11 +601,11 @@ class Wall: #벽 클래스
         self.y = y
         self.hp = stage * 6
         self.wall_state = wall_normal #기본은 기본 벽 텍스처
-        self.wall_rect = pygame.Rect(self.x, self.y, 85, 85) #벽 범위
+        self.wall_rect = pygame.Rect(self.x, self.y, 80, 80) #벽 범위
         self.top = self.y
         self.left = self.x
-        self.bottom = self.y + 85
-        self.right = self.x + 85
+        self.bottom = self.y + 80
+        self.right = self.x + 80
 
     def draw(self):
         screen.blit(self.wall_state, (self.x, self.y))
@@ -1399,9 +1419,9 @@ while 1:
                         
                     pygame.display.update() #화면에 나타내기
                     
-    if character.y != screen_height - 300 and character.canMove_D == True and character.isJump == 0:
-        character.v = -2
-        for kk in range (character.y <= screen_height - 300):
-            character.y -= character.v * character.m
+    # if character.y != screen_height - 300 and character.canMove_D == True and character.isJump == 0:
+    #     character.v -= 2
+    #     for kk in range (character.y <= screen_height - 300):
+    #         character.y -= character.v * character.m
 
     pygame.display.update() #화면 업데이트
