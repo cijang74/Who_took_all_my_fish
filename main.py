@@ -21,6 +21,40 @@ pygame.display.set_caption('게임 이름')
 clock = pygame.time.Clock()
 
 #각종 이미지 불러오기
+# 펭귄1 ########################################
+penguinR_image = [pygame.image.load("images/penguinR/1.png").convert(),
+                     pygame.image.load("images/penguinR/2.png").convert(),
+                     pygame.image.load("images/penguinR/3.png").convert(),
+                     pygame.image.load("images/penguinR/4.png").convert(),
+                     pygame.image.load("images/penguinR/5.png").convert()]
+penguinL_image = [pygame.image.load("images/penguinL/1.png").convert(),
+                     pygame.image.load("images/penguinL/2.png").convert(),
+                     pygame.image.load("images/penguinL/3.png").convert(),
+                     pygame.image.load("images/penguinL/4.png").convert(),
+                     pygame.image.load("images/penguinL/5.png").convert()]
+for i in range(5) :
+    penguinR_image[i] = pygame.transform.scale(penguinR_image[i], (125, 200))
+    penguinL_image[i] = pygame.transform.scale(penguinL_image[i], (125, 200))
+
+###############################################
+
+# 보스1 #######################################
+bossPenguin_image = pygame.image.load("images/bossPenguin_stay.png").convert()
+bossPenguin_attack_image = pygame.image.load("images/bossPenguin_attack.png").convert()
+
+bossPenguin_image = pygame.transform.scale(bossPenguin_image, (470, 750))
+bossPenguin_attack_image = pygame.transform.scale(bossPenguin_attack_image, (470, 750))
+
+# UI1 #########################################
+heart_images = [pygame.image.load("images/heart/heart_FULL.png").convert()]
+water_images = [pygame.image.load("images/water/water_FULL.png").convert()]
+
+for i in range(len(heart_images)) :
+    heart_images[i] = pygame.transform.scale(heart_images[i], (120, 120))
+
+heart_image = heart_images[0]
+water_image = water_images[0]
+###############################################
 homescreen_image = pygame.image.load('images/homescreen.png').convert()
 
 one_image = pygame.image.load('images/1.png').convert()
@@ -60,8 +94,9 @@ enemy_image.set_colorkey((0, 0, 0))
 boss_image = pygame.image.load('images/boss.png').convert()
 boss_image.set_colorkey((255, 255, 255))
 
-wall_normal = pygame.image.load('images/wall_normal.png').convert()
-wall_normal = pygame.transform.scale(wall_normal, (80, 80))
+wall_normal = pygame.image.load('images/tile_middle.png').convert()
+wall_normal2 = pygame.image.load('images/tile_middle2.png').convert()
+
 wall_broken = pygame.image.load('images/wall_broken.png').convert()
 wall_broken.set_colorkey((255, 255, 255))
 
@@ -213,12 +248,11 @@ class Character: #플레이어 클래스
     def __init__(self):
         # 초기 위치
         self.x = 130
-        self.y = screen_height - 300
+        self.y = screen_height - 360
 
         self.switch = False
         self.backCount = 0
         
-        self.last_block = False
         self.dx = 0
         self.dy = 0
         self.range = 0
@@ -248,15 +282,16 @@ class Character: #플레이어 클래스
 
     def respawn(self): #플레이어 리스폰 위치(오른쪽으로 이동했을 때)
         self.x = 130
-        self.y = screen_height - 300
+        self.y = screen_height - 360
         self.range = 0
 
     def respawn2(self): #플레이어 리스폰 위치(우주 그림에서 나왔을 떄)
         self.x = 800
-        self.y = screen_height - 300
+        self.y = screen_height - 360
         self.range = 0
 
     def move(self, walls): #플레이어 이동 함수 + 벽을 지나갈 수 없게 하는 함수
+        self.character_rect = pygame.Rect(self.x, self.y, 125, 200) ##추가
         ##이 부분부터 판정 알고리즘 수정
         wallCount = 0
         if(stage >= 1):
@@ -268,7 +303,6 @@ class Character: #플레이어 클래스
                     self.canMove_L = True
                     self.canMove_U = True
                     self.canMove_D = False
-                    self.last_block = True
                     character.y = walls[wallCount].top - 200
                     break
 
@@ -277,35 +311,22 @@ class Character: #플레이어 클래스
                     self.canMove_L = False
                     self.canMove_U = False
                     self.canMove_D = True
-                    self.last_block = True
                     break
+                    
 
                 elif walls[wallCount].left <= character.right and walls[wallCount].right > character.right and (walls[wallCount].top  < character.bottom or walls[wallCount].bottom  < character.top):
                     self.canMove_R = False
                     self.canMove_L = True
                     self.canMove_U = False
                     self.canMove_D = True
-                    self.last_block = True
                     break
                     
-                elif (not(character.right < walls[wallCount].left or character.left > walls[wallCount].right) and self.last_block == True):
-                    self.canMove_R = True
-                    self.canMove_L = True
-                    self.canMove_U = True
-                    self.canMove_D = True
-
-                    while(character.y <= screen_height - 300):
-                        character.y += 2
-                    else:
-                        character.y = screen_height - 300
-                    break
-
                 else:
                     self.canMove_R = True
                     self.canMove_L = True
                     self.canMove_U = True
                     self.canMove_D = True
-                    self.last_block = False
+
                 
         if len(walls) == 0: # 마지막 벽이 깨질 때 벽에 붙어 있으면 이후 위의 for문이 안돌아 다시 self.canMove를 True로 돌리는 코드가 없었음, 또 다른 버그 생길 수도 있음
             self.canMove_L = True
@@ -390,11 +411,11 @@ class Character: #플레이어 클래스
                 self.v -= 0.2
 
             # 바닥에 닿았을때, 변수 리셋
-            if self.y > screen_height - 300 and self.canMove_D == True:
-                self.y = screen_height - 300
+            if self.y > screen_height - 360 and self.canMove_D == True:
+                self.y = screen_height - 360
                 self.isJump = 0
 
-                if self.y != screen_height - 300 and self.canMove_D == True and self.isJump == 0:
+                if self.y != screen_height - 360 and self.canMove_D == True and self.isJump == 0:
                     pass
 
                 else: 
@@ -611,11 +632,17 @@ class TextBox:
             screen.blit(textbox_image4, (self.x, self.y))
 
 class Wall: #벽 클래스
-    def __init__(self, x, y):
+    def __init__(self, x, y, b_type):
         self.x = x
         self.y = y
         self.hp = stage * 6
-        self.wall_state = wall_normal #기본은 기본 벽 텍스처
+        
+        if (b_type == "normal"):
+            self.wall_state = wall_normal #기본은 기본 벽 텍스처
+
+        elif (b_type == "under"):
+            self.wall_state = wall_normal2 #기본은 기본 벽 텍스처
+
         self.wall_rect = pygame.Rect(self.x, self.y, 80, 80) #벽 범위
         self.top = self.y
         self.left = self.x
@@ -826,13 +853,13 @@ class Stage: #스테이지 클래스
         Button(end_image,780,520,313,97,end_image,780,520,'end')
 
     #스테이지 편하게 만들기 위한 함수들
-    def makeWall_garo(self, x, y, i):
+    def makeWall_garo(self, x, y, i, b_type):
         for z in range (0, i + 1):   
-            walls.append(Wall(x + 80 * z, y))
+            walls.append(Wall(x + 80 * z, y, b_type))
 
-    def makeWall_sero(self, x, y, i):
+    def makeWall_sero(self, x, y, i, b_type):
         for z in range (0, i+1):   
-            walls.append(Wall(x, y + 80 * z))
+            walls.append(Wall(x, y + 80 * z, b_type))
 
     #각 스테이지들에서의 오브젝트 배치
 
@@ -894,8 +921,106 @@ class Button: #버튼 클래스
         else:
             screen.blit(img_in,(x,y))
 
+# 펭귄2 #######################################################################
+class Penguin:
+    def __init__(self, x, y):   # x, y는 펭귄 초기 위치
+        
+        # 펭귄 크기
+        self.width = 125
+        self.height = 200
+
+        # 펭귄 위치
+        self.x = x
+        self.y = y
+
+        # 펭귄 방향
+        self.image_time = time.time()
+        self.image_num = 0
+        self.penguin_image = penguinL_image[self.image_num]
+        self.isLeft = True
+        self.isRight = False
+
+        # 펭귄 렉트값 (지금은 안 씀)
+        self.penguin_rect = self.penguin_image.get_rect()
+        self.penguin_rect.left = self.x
+        self.penguin_rect.top = self.y
+
+        # 펭귄 속도
+        self.speed = 5
+
+        # 펭귄 HP
+        self.hp = 1
+
+    def move(self, min_x, max_x) :    # 이동 범위: min_x ~ max_x
+        # 펭귄 범위 한정(710~1210), 방향 전환
+        if (self.isLeft and self.x <= min_x) :
+            self.isLeft = False
+            self.isRight = True
+            self.image_num = 0
+            self.image_time = time.time()
+        elif (self.isRight and self.x + self.width >= max_x) :
+            self.isLeft = True
+            self.isRight = False
+            self.image_num = 0
+            self.image_time = time.time()
+
+        # 펭귄 이동
+        if (self.isLeft) :
+            self.x -= self.speed
+        elif (self.isRight) :
+            self.x += self.speed
+
+    def draw(self):
+        # 애니메이션
+        if (self.isLeft and time.time() - self.image_time >= 0.05) :  # 오른쪽
+            if (self.image_num < 4) :
+                self.image_num += 1
+            else :
+                self.image_num = 0
+            self.penguin_image = penguinL_image[self.image_num]
+            self.image_time = time.time()
+        elif (self.isRight and time.time() - self.image_time >= 0.05) :  # 오른쪽
+            if (self.image_num < 4) :
+                self.image_num += 1
+            else :
+                self.image_num = 0
+            self.penguin_image = penguinR_image[self.image_num]
+            self.image_time = time.time()
+        # 그리기
+        screen.blit(self.penguin_image, (self.x, self.y))
+
+    def hit(self, missiles) :
+        return self.y < missiles.y + 26 and missiles.y < self.y + self.height and self.x < missiles.x + 8 and missiles.x < self.x + self.width
+###############################################################################
+
+# 보스2 ##########################################################
+
+class Boss_Penguin:
+    def __init__(self,t):
+        self.x = 1500
+        self.y = 300
+        self.width = 470
+        self.height = 750
+        self.hp = 20
+        self.t = t
+
+    def draw(self):
+        if self.t == "attack":
+            screen.blit(bossPenguin_attack_image, (self.x, self.y))
+        else:
+            screen.blit(bossPenguin_image, (self.x, self.y))
+
+    def hit(self, missiles): # 피격 판정
+        return self.y < missiles.y + 26 and missiles.y < self.y + self.height and self.x < missiles.x + 8 and missiles.x < self.x + self.width
+
+    def fire(self): # 왼쪽 방향으로 총알 발사
+        badguys.append(Badguy_Right(self.x + 15, self.y + random.randint(750//4, 750//4*3)))
+
+##################################################################
+
 character = Character()
 Map = Stage()
+penguin = Penguin(960, 710) # 매개변수: 펭귄 초기 위치
 
 # 한번만 쓸 것들
 theif = Theif("")
@@ -911,6 +1036,21 @@ cave_trashs = []
 space_trashs = []
 ####################################################################
 #################################################################### 게임루프
+# 타이틀UI-1 ###########
+isRunning = True
+
+# 펭귄3 ##########################################################
+penNum_stage3 = 1
+penNum_stage6 = 1
+penguin3 = Penguin(960, 710) # 매개변수: 펭귄 초기 위치
+penguin6 = Penguin(960, 710)
+##################################################################
+
+# 보스3 ##########################################################
+penNum_stage7 = 1
+bossPenguin = Boss_Penguin("")
+spawn = False
+##################################################################
 
 while 1:
     dt = clock.tick(60) #초당 프레임수는 60이다.
@@ -1013,7 +1153,8 @@ while 1:
         if stage == 1 and mapcounter == 1:
             start_time = time.time()
             Map.stage1()
-            Map.makeWall_garo(300, 800, 6)
+            Map.makeWall_garo(0, 1000, 24, "under")
+            Map.makeWall_garo(0, 920, 24, "normal")
             theif.x = 1500
             theif.y = screen_height - 300
             treasure_txt = False
@@ -1094,6 +1235,17 @@ while 1:
                     del textboxs[t]
                     stop = time.time()
 
+        # 보스4 - 공격 준비 ################
+        if stage == 7 and t < len(textboxs):
+            textboxs[t].draw()
+            istext_on = True
+            if pressed_keys[K_z]:
+                if (time.time() - stop) > character.attac_speed:
+                    del textboxs[t]
+                    stop = time.time()
+                spawn = True
+        ####################################
+
         spawn = True
         if stage == 7 and t < len(textboxs):
             textboxs[t].draw()
@@ -1139,6 +1291,21 @@ while 1:
             theif.draw()
 
         if stage == 3:
+            # 펭귄4 ##################################################
+            if penNum_stage3 > 0 :
+                if penguin3.hp != 0 :
+                    penguin3.move(710, 1210) # 이동 범위(x값)
+                    penguin3.draw()
+                    while tt < len(missiles): #미사일과 도둑이 닿으면 hp 1 감소
+                        if penguin3.hit(missiles[tt]):
+                            del missiles[tt]
+                            penguin3.hp -= 1
+                            print(penguin3.hp)
+                            tt -= 1
+                            del penguin3
+                            penNum_stage3 -= 1
+                        tt+=1
+            '''
             if theif.x > character.x: #오른쪽 방향을 보게 해야함   
                 theif.draw2()
 
@@ -1147,31 +1314,47 @@ while 1:
             
             if time.time() - last_trash_spawn_time> 0.4+ ggg and spawn == True: # 쓰레기들 스폰
                 cave_trashs.append(Cave_Trash())
-                ggg -= 0.002 # 시간이 지날수록 더 많이 생성됨
-                last_trash_spawn_time = time.time()
+                ggg -= 0.002
+                last_trash_spawn_time = time.time()'''
+            ##########################################################
 
         if stage == 4 and theif.y > 350:
             theif.stage2_move()
             theif.draw()
 
         if stage == 6:
-            if theif.x > character.x: #오른쪽 방향을 보게 해야함   
-                theif.draw2()
-
-            if theif.x < character.x: #왼쪽 방향을 보게 해야함
-                theif.draw()
-
-            if time.time() - last_trash_spawn_time > 1+ fff: # 쓰레기들 스폰
-                space_trashs.append(Space_Trash())
-                fff -= 0.002
-                last_trash_spawn_time = time.time()
+            # 스테이지2 ##############################################
+            if penNum_stage6 > 0 :
+                if penguin6.hp != 0 :
+                    penguin6.move(710, 1210) # 이동 범위(x값)
+                    penguin6.draw()
+                    while tt < len(missiles): #미사일과 도둑이 닿으면 hp 1 감소
+                        if penguin6.hit(missiles[tt]):
+                            del missiles[tt]
+                            penguin6.hp -= 1
+                            print(penguin6.hp)
+                            tt -= 1
+                            del penguin6
+                            penNum_stage6 -= 1
+                        tt+=1
 
         if stage == 7:
-            if theif.x > character.x: #오른쪽 방향을 보게 해야함   
-                theif.draw2()
-
-            if theif.x < character.x: #왼쪽 방향을 보게 해야함
-                theif.draw()
+             # 보스5 - 피격 #############################
+            if penNum_stage7 > 0 :
+                if bossPenguin.hp == 0 :
+                    del bossPenguin
+                    penNum_stage7 -= 1
+                    spawn = False
+                else :
+                    bossPenguin.draw()
+                    while tt < len(missiles): #미사일과 도둑이 닿으면 hp 1 감소
+                        if bossPenguin.hit(missiles[tt]):
+                            del missiles[tt]
+                            bossPenguin.hp -= 1
+                            print(bossPenguin.hp)
+                            tt -= 1
+                        tt+=1
+            ############################################
 
         if stage == 3:
             cc = 0
@@ -1204,18 +1387,19 @@ while 1:
                 ss += 1
 
         #포탈 관련: 닿으면 캐릭터를 리스폰 위치로 옮기고 스테이지 1 증가
-        if character.x > 1920 - 140 and (stage == 1 or ((stage == 3 or stage == 6) and theif.x >1920)): # 좌표 조건식으로 변경
+        # 스테이지1
+        if character.x > 1920 - 140 and (stage == 1 or (stage == 3 and penNum_stage3 == 0) or (stage == 6 and penNum_stage6 == 0)): # 좌표 조건식으로 변경
             stage += 1
-            if stage == 7:
-                character.respawn2()
-            else:
-                character.respawn()
+            character.respawn()
+            
             enemys.clear()
             badguys.clear()
             walls.clear()
             missiles.clear()
 
         tt = 0
+        # 펭귄5 ###############################################################
+        '''
         if theif.hp != 0 and stage >= 3:
             while tt < len(missiles): #미사일과 도둑이 닿으면 hp 1 감소
                 if theif.hit(missiles[tt]):
@@ -1227,6 +1411,8 @@ while 1:
                         theif.y = random.randint(100, 800)
                     tt -= 1
                 tt+=1
+        '''
+        #######################################################################
         
         if theif.hp == 0: # hp0돼면 ㅌㅌ
             theif.stage3_move(theif.x)
@@ -1374,7 +1560,10 @@ while 1:
 
         #기본 인터페이스 정보
         if stage >= 1 and stage <= 10:
-
+            # UI2 ##########################################################
+            screen.blit(heart_image, (10, 10))
+            screen.blit(water_image, (150, 10))
+            ################################################################
             hp_str_text = font3.render('HP', True, (255,128,128))
             screen.blit(hp_str_text, (10,10))
             hp_text = font3.render(str(int(character.hp)), True, (255,128,128))
