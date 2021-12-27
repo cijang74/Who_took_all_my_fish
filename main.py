@@ -11,6 +11,7 @@ screen_width = 1920 # 가로크기
 screen_height = 1080 # 세로크기
 RGB = ((22, 255, 255))
 RGB2 = ((0,255,0))
+RGB3 = ((114,255,92))
 
 #게임 크기
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -211,7 +212,93 @@ bad_News = pygame.image.load('images/bad_news.png').convert()
 Main_Buttun = pygame.image.load('images/Main.png').convert()
 Main_Buttun_rect = Main_Buttun.get_rect()
 
+################################################################## 쌔삥
+
+playerTextureDefault=pygame.image.load('images/주인공_대기.png').convert() #오른방향 기본자세
+playerTextureDefault.set_colorkey(RGB3)
+
+LplayerTextureDefault=pygame.image.load('images/주인공_대기_반전.png').convert() #왼방향 기본자세
+LplayerTextureDefault.set_colorkey(RGB3)
+
+playerTexture=pygame.image.load('images/주인공_대기.png').convert()
+playerTexture.set_colorkey(RGB3)
+
+playerWalk1=pygame.image.load('images/player_walk_1.png').convert() #오른쪽 걷기
+playerWalk1.set_colorkey(RGB3)
+playerWalk2=pygame.image.load('images/player_walk_2.png').convert()
+playerWalk2.set_colorkey(RGB3)
+playerWalk3=pygame.image.load('images/player_walk_3.png').convert()
+playerWalk3.set_colorkey(RGB3)
+playerWalk4=pygame.image.load('images/player_walk_4.png').convert() #오른쪽 걷기
+playerWalk4.set_colorkey(RGB3)
+playerWalk5=pygame.image.load('images/player_walk_5.png').convert()
+playerWalk5.set_colorkey(RGB3)
+
+
+LplayerWalk1=pygame.image.load('images/주인공_1_반전.png').convert() #왼쪽 걷기
+LplayerWalk1.set_colorkey(RGB3)
+
+LplayerWalk2=pygame.image.load('images/주인공_2_반전.png').convert()
+LplayerWalk2.set_colorkey(RGB3)
+
+LplayerWalk3=pygame.image.load('images/주인공_3_반전.png').convert()
+LplayerWalk3.set_colorkey(RGB3)
+
+LplayerWalk4=pygame.image.load('images/주인공_4_반전.png').convert()
+LplayerWalk4.set_colorkey(RGB3)
+
+LplayerWalk5=pygame.image.load('images/주인공_5_반전.png').convert()
+LplayerWalk5.set_colorkey(RGB3)
+
+playerJump1=pygame.image.load('images/주인공_점프.png').convert() #오른쪽 점프
+playerJump1.set_colorkey(RGB3)
+
+playerJump2=pygame.image.load('images/주인공_점프.png').convert()
+playerJump2.set_colorkey(RGB3)
+
+playerJump3=pygame.image.load('images/주인공_점프.png').convert()
+playerJump3.set_colorkey(RGB3)
+
+LplayerJump1=pygame.image.load('images/주인공_점프_반전.png').convert() #왼쪽 점프
+LplayerJump1.set_colorkey(RGB3)
+
+LplayerJump2=pygame.image.load('images/주인공_점프_반전.png').convert()
+LplayerJump2.set_colorkey(RGB3)
+
+LplayerJump3=pygame.image.load('images/주인공_점프_반전.png').convert()
+LplayerJump3.set_colorkey(RGB3)
+
+playerAttack1=pygame.image.load('images/주인공_공격1.png').convert() #오른쪽 공격
+playerAttack1.set_colorkey(RGB3)
+
+playerAttack2=pygame.image.load('images/주인공_공격2.png').convert()
+playerAttack2.set_colorkey(RGB3)
+
+playerAttack3=pygame.image.load('images/주인공_공격3.png').convert()
+playerAttack3.set_colorkey(RGB3)
+
+LplayerAttack1=pygame.image.load('images/주인공_공격1_반전.png').convert() #왼쪽 공격
+LplayerAttack1.set_colorkey(RGB3)
+
+LplayerAttack2=pygame.image.load('images/주인공_공격2_반전.png').convert()
+LplayerAttack2.set_colorkey(RGB3)
+
+LplayerAttack3=pygame.image.load('images/주인공_공격3_반전.png').convert()
+LplayerAttack3.set_colorkey(RGB3)
+
 GAME_OVER = pygame.image.load('images/gameover.png').convert()
+
+isWalk=False #뭔 행동을 하는지 판단
+
+isJump=False
+
+isAttack=False
+
+walkAniTimer=0 #스프라이트 재생 타이머
+jumpAniTimer=0
+attackAniTimer=0
+
+isplayerRight=True #오른쪽을 바라보고 있는지
 
 #폰트들 설정
 font = pygame.font.Font(None, 15)
@@ -365,7 +452,7 @@ class Character: #플레이어 클래스
                     pygame.mixer.Sound.play(walk_sound)
                     self.stop = time.time()
 
-        if pressed_keys[K_x] and self.canMove_U == True:
+        if pressed_keys[K_LALT] and self.canMove_U == True:
             if istext_on == False:
                 self.lastInput = 3
 
@@ -436,41 +523,8 @@ class Character: #플레이어 클래스
         self.right = self.x + 125
 
 
-    def draw(self): #그리기(각도에 따라 로테이션 해줌)
-        global last
-
-        if pressed_keys[K_z] and istext_on == False:
-            if last == character_image or last == character_image_walk_1 or last == character_image_walk_2 or last == character_attack_image:
-                screen.blit(character_attack_image, (self.x, self.y))
-                last = character_attack_image
-
-            if last == character2_image or last == character_image_walk_1R or last == character_image_walk_2R or last == character2_attack_image:
-                screen.blit(character2_attack_image, (self.x, self.y))
-                last = character2_attack_image
-        
-        elif pressed_keys[K_LEFT] and istext_on == False: #왼
-            if not(pressed_keys[K_z]):
-                if time.time() - self.last_time > 0.4:
-                    last = character_image_walk_1R
-                    if time.time() - self.last_time > 0.8:
-                        self.last_time = time.time()
-                else:
-                    last = character_image_walk_2R
-        elif event.type == pygame.KEYUP and event.key == pygame.K_LEFT:
-            last = character2_image
-
-        elif pressed_keys[K_RIGHT] and istext_on == False: #오
-            if not(pressed_keys[K_z]):
-                if time.time() - self.last_time > 0.4:
-                    last = character_image_walk_1
-                    if time.time() - self.last_time > 0.8:
-                        self.last_time = time.time()
-                else:
-                    last = character_image_walk_2
-        elif event.type == pygame.KEYUP and event.key == pygame.K_RIGHT:
-            last = character_image
-
-        screen.blit(last, (self.x, self.y))
+    def draw(self):
+        screen.blit(playerTexture, (self.x, self.y))
     
     def fire(self): #미사일 발사(총구의 방향에서 발사되게 조정해놓음)
         if self.range == 0:
@@ -1061,11 +1115,46 @@ while 1:
     pressed_keys = pygame.key.get_pressed() # 코딩 편하게 할려고 미리 써 놓은거 (게임과는 상관 X)
 
     for event in pygame.event.get():
+        if event.type==pygame.KEYDOWN:
+            if event.key==pygame.K_LEFT:
+                print("왼쪽 누름")
+                isplayerRight=False
+                isWalk=True
+                walkAniTimer=time.time()
+            if event.key==pygame.K_RIGHT:
+                print("오른쪽 누름")
+                isplayerRight=True
+                isWalk=True
+                walkAniTimer=time.time()
+            if event.key==pygame.K_LALT:
+                print("왼쪽 알트키 누름")
+                isJump=True
+                jumpAniTimer=time.time()
+            if event.key==pygame.K_LSHIFT:
+                print("왼쪽 쉬프트키 누름")
+                isAttack=True
+                attackAniTimer=time.time()
+
+        if event.type==pygame.KEYUP: #키 땠을 때
+            if event.key==pygame.K_LEFT:
+                print("왼쪽 땜")
+                isWalk=False
+                playerTexture=LplayerTextureDefault
+            if event.key==pygame.K_RIGHT:
+                print("오른쪽 땜")
+                isWalk=False
+                playerTexture=playerTextureDefault
+            if event.key==pygame.K_LALT:
+                print("왼쪽 알트키 땜")
+                #isJump=False
+                #playerTexture=playerTextureDefault
+            if event.key==pygame.K_LSHIFT:
+                print("왼쪽 쉬프트키 땜")
 
         if event.type == QUIT:
             sys.exit() # X 누르면 나가기
 
-        if event.type == KEYDOWN and event.key == K_z:
+        if event.type == KEYDOWN and event.key == K_LSHIFT:
             if stage >= 1 and istext_on == False:
                 character.fire() # SPACE 누르면 총알 발사
                 pygame.mixer.Sound.play(shot_sound)
@@ -1150,7 +1239,6 @@ while 1:
             screen.blit(clear_News, (0, 0))
         
         character.move(walls)
-        character.draw()
         character.update()
 
         # 한 번만 체크하는거
@@ -1440,17 +1528,11 @@ while 1:
         
         ra = random.random()
         if time.time() - last_trash_spawn_time > ra + ddd and stage == 7: #만약 포탑 사정거리 범위 내에 캐릭터가 있다면
-                    if spawn == True:
-                        if theif.x > character.x: #오른쪽 방향을 보게 해야함
-                            theif.t = "attack"   
-                            theif.draw2()
-
-                        if theif.x < character.x: #왼쪽 방향을 보게 해야함
-                            theif.t = "attack" 
-                            theif.draw()
-                        theif.fire()
-                        ddd -= 0.002
-                        last_trash_spawn_time = time.time()
+            if spawn == True:
+                bossPenguin.t = "attack"
+                bossPenguin.fire()
+                ddd -= 0.002
+                last_trash_spawn_time = time.time()
 
         i = 0 #포탑 총알 판단: 그리기, 화면 넘어가면 삭제
         while i < len(badguys):
@@ -1622,4 +1704,70 @@ while 1:
     #     for kk in range (character.y <= screen_height - 300):
     #         character.y -= character.v * character.m
 
+    if isWalk==True and isplayerRight==False and isJump==False and isAttack==False: #왼쪽 이동
+        if time.time()-walkAniTimer<0.2:
+            playerTexture=LplayerWalk1
+        elif time.time()-walkAniTimer<0.4:
+            playerTexture=LplayerWalk2
+        elif time.time()-walkAniTimer<0.6:
+            playerTexture=LplayerWalk3
+        else:
+            walkAniTimer=time.time()
+
+    if isWalk==True and isplayerRight==True and isJump==False and isAttack==False: #오른쪽 이동
+        if time.time()-walkAniTimer<0.2:
+            playerTexture=playerWalk1
+        elif time.time()-walkAniTimer<0.4:
+            playerTexture=playerWalk2
+        elif time.time()-walkAniTimer<0.6:
+            playerTexture=playerWalk3
+        else:
+            walkAniTimer=time.time()
+
+    if isJump==True and isplayerRight==False and isAttack==False: #왼쪽 점프
+        if time.time()-jumpAniTimer<0.2:
+            playerTexture=LplayerJump1
+        elif time.time()-jumpAniTimer<0.4:
+            playerTexture=LplayerJump2
+        elif time.time()-jumpAniTimer<0.6:
+            playerTexture=LplayerJump3
+        else:
+            isJump=False
+            playerTexture=LplayerTextureDefault
+
+    if isJump==True and isplayerRight==True and isAttack==False: #오른쪽 점프
+        if time.time()-jumpAniTimer<0.2:
+            playerTexture=playerJump1
+        elif time.time()-jumpAniTimer<0.4:
+            playerTexture=playerJump2
+        elif time.time()-jumpAniTimer<0.6:
+            playerTexture=playerJump3
+        else:
+            isJump=False
+            playerTexture=playerTextureDefault
+
+    if isAttack==True and isplayerRight==False: #왼쪽 공격
+        if time.time()-attackAniTimer<0.1:
+            playerTexture=LplayerAttack1
+        elif time.time()-attackAniTimer<0.2:
+            playerTexture=LplayerAttack2
+        elif time.time()-attackAniTimer<0.3:
+            playerTexture=LplayerAttack3
+        else:
+            isAttack=False
+            playerTexture=LplayerTextureDefault
+
+    if isAttack==True and isplayerRight==True: #오른쪽 공격
+        if time.time()-attackAniTimer<0.1:
+            playerTexture=playerAttack1
+        elif time.time()-attackAniTimer<0.2:
+            playerTexture=playerAttack2
+        elif time.time()-attackAniTimer<0.3:
+            playerTexture=playerAttack3
+        else:
+            isAttack=False
+            playerTexture=playerTextureDefault
+    
+    if (stage >= 1):
+        character.draw()
     pygame.display.update() #화면 업데이트
