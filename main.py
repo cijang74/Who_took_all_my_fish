@@ -218,6 +218,7 @@ class Character: #플레이어 클래스
         self.switch = False
         self.backCount = 0
         
+        self.last_block = False
         self.dx = 0
         self.dy = 0
         self.range = 0
@@ -267,6 +268,7 @@ class Character: #플레이어 클래스
                     self.canMove_L = True
                     self.canMove_U = True
                     self.canMove_D = False
+                    self.last_block = True
                     character.y = walls[wallCount].top - 200
                     break
 
@@ -275,22 +277,35 @@ class Character: #플레이어 클래스
                     self.canMove_L = False
                     self.canMove_U = False
                     self.canMove_D = True
+                    self.last_block = True
                     break
-                    
 
                 elif walls[wallCount].left <= character.right and walls[wallCount].right > character.right and (walls[wallCount].top  < character.bottom or walls[wallCount].bottom  < character.top):
                     self.canMove_R = False
                     self.canMove_L = True
                     self.canMove_U = False
                     self.canMove_D = True
+                    self.last_block = True
                     break
                     
-                else:
+                elif (not(character.right < walls[wallCount].left or character.left > walls[wallCount].right) and self.last_block == True):
                     self.canMove_R = True
                     self.canMove_L = True
                     self.canMove_U = True
                     self.canMove_D = True
 
+                    while(character.y <= screen_height - 300):
+                        character.y += 2
+                    else:
+                        character.y = screen_height - 300
+                    break
+
+                else:
+                    self.canMove_R = True
+                    self.canMove_L = True
+                    self.canMove_U = True
+                    self.canMove_D = True
+                    self.last_block = False
                 
         if len(walls) == 0: # 마지막 벽이 깨질 때 벽에 붙어 있으면 이후 위의 for문이 안돌아 다시 self.canMove를 True로 돌리는 코드가 없었음, 또 다른 버그 생길 수도 있음
             self.canMove_L = True
