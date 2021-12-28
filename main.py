@@ -75,6 +75,10 @@ water_images = [pygame.image.load("images/water/water1_5.png").convert(),
 
 for i in range(len(heart_images)) :
     heart_images[i] = pygame.transform.scale(heart_images[i], (120, 120))
+    heart_images[i].set_colorkey(RGB2)
+
+for j in range(len(water_images)) :
+    water_images[j].set_colorkey(RGB2)
 
 heart_image = heart_images[3]
 water_image = water_images[4]
@@ -226,8 +230,8 @@ stage_museum_no_ring = pygame.image.load('images/museum_ring.png').convert()
 stage_cave = pygame.image.load('images/museum_ring.png').convert()
 stage_broken_museum = pygame.image.load('images/museum_ring.png').convert()
 stage_space = pygame.image.load('images/museum_ring.png').convert()
-clear_News = pygame.image.load('images/museum_ring.png').convert()
-bad_News = pygame.image.load('images/museum_ring.png').convert()
+clear_News = pygame.image.load('images/clear.png').convert()
+bad_News = pygame.image.load('images/bad_news.png').convert()
 Main_Buttun = pygame.image.load('images/museum_ring.png').convert()
 Main_Buttun_rect = Main_Buttun.get_rect()
 
@@ -313,6 +317,8 @@ isJump=False
 
 isAttack=False
 
+isend = False
+
 walkAniTimer=0 #스프라이트 재생 타이머
 jumpAniTimer=0
 attackAniTimer=0
@@ -353,6 +359,7 @@ treasure_sound = pygame.mixer.Sound('sounds/treasure.wav')
 portal_sound = pygame.mixer.Sound('sounds/portal.wav')
 stage_music = pygame.mixer.Sound('sounds/stage_music.wav')
 clear_sound = pygame.mixer.Sound('sounds/clear_sound.wav')
+water_sound = pygame.mixer.Sound('sounds/물뜨는거.wav')
 
 ####################################################################
 #################################################################### 클래스
@@ -1207,6 +1214,9 @@ bossPenguin = Boss_Penguin("")
 spawn = False
 ##################################################################
 
+stage_music_loop = pygame.mixer.Sound(stage_music)
+stage_music_loop.play(-1) #음악 반복 재생
+
 while 1:
     dt = clock.tick(60) #초당 프레임수는 60이다.
     pressed_keys = pygame.key.get_pressed() # 코딩 편하게 할려고 미리 써 놓은거 (게임과는 상관 X)
@@ -1561,6 +1571,10 @@ while 1:
                     print("test")
                     character.mp = 4
                     water_image = water_images[character.mp]
+                    start_timeme = time.time()
+                    if (time.time() - start_timeme)>0.4:
+                        pygame.mixer.Sound.play(water_sound)
+                        start_timeme = time.time()
             ##########################################################
 
         if stage == 4 and theif.y > 350:
@@ -1607,6 +1621,11 @@ while 1:
                     print("test")
                     character.mp = 4
                     water_image = water_images[character.mp]
+                    start_timeme = time.time()
+                    if (time.time() - start_timeme)>0.4:
+                        pygame.mixer.Sound.play(water_sound)
+                        start_timeme = time.time()
+                    
 
         if stage == 7:
             screen.blit(well_image, (575, screen_height - 345))
@@ -1621,6 +1640,10 @@ while 1:
                     del bossPenguin
                     penNum_stage7 -= 1
                     spawn = False
+                    isend = True
+                    pygame.time.delay(100)
+                    screen.blit(clear_News,(0,0))
+                    
                 else :
                     bossPenguin.draw()
                     while tt < len(missiles): #미사일과 도둑이 닿으면 hp 1 감소
@@ -1635,6 +1658,10 @@ while 1:
                     print("test")
                     character.mp = 4
                     water_image = water_images[character.mp]
+                    start_timeme = time.time()
+                    if (time.time() - start_timeme)>0.4:
+                        pygame.mixer.Sound.play(water_sound)
+                        start_timeme = time.time()
             ############################################
 
         if stage == 3:
@@ -1877,60 +1904,23 @@ while 1:
             else :
                 mapcounter = 3
                 stage = 3
-                
+        
+        if(stage >= 3) and isend == False:
+            character.draw()
+
         ##################################
 
         #캐릭터의 체력이 0이되어 게임 오버되었을 때 각종 게임 정보들 화면에 띄우기
         if character.hp <= 0:
-                enemys.clear()
-                badguys.clear()
                 walls.clear()
-                #stage_music_loop.stop()
+                stage_music_loop.stop()
                 screen.blit(bad_News,(0,0))
-                Button(Main_Buttun,210,620,313,97,Main_Buttun,210,620,'replay')
-
-                score = (character.hp * 100) - (int(start_time - time.time())) #점수 계산
-                if high_score < score:
-                        high_score = score
-
-                #점수 화면에 띄우기
-
                 mapcounter += 1
+
                 while 1:
                     for event in pygame.event.get():
                         if event.type == QUIT:
                             sys.exit() # X누르면 나가기
-
-                    if pygame.mouse.get_pressed()[0] and Main_Buttun_rect.collidepoint(pygame.mouse.get_pos()):
-                        last_fire = 0
-                        stage = 0
-                        score = 0
-                        fff
-                        ggg
-
-                        mapcounter = 1
-                        missile_speed = 10
-                        character = Character()
-                        Map = Stage()
-                        theif = Theif("")
-                        badguys = []
-                        enemys = []
-                        walls = []
-                        boss = []
-                        cave_trashs = []
-                        space_trashs = []
-                        missiles = []
-                        boss_missiles = []
-                        last_trash_spawn_time = 0
-                        ggg = 0
-                        fff = 0
-                        ddd = 0.9
-                        Map.homescreen()
-                        time.sleep(0.5)
-                        break
-
-                    elif pygame.mouse.get_pressed()[0] and end_rect.collidepoint(pygame.mouse.get_pos()):
-                        sys.exit()
                         
                     pygame.display.update() #화면에 나타내기
                     
@@ -2002,10 +1992,5 @@ while 1:
         else:
             isAttack=False
             playerTexture=playerTextureDefault
-    
-    if(stage >= 3):
-        character.draw()
-
-    print(character.x)
 
     pygame.display.update() #화면 업데이트
