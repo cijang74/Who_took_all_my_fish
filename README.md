@@ -8,7 +8,7 @@
 기획, 사운드, 프로그래밍 보조: 송규섭 <br/>
 
 참고 자료 <br/>
-[효과음]
+[효과음] <br/>
 https://mixkit.co/free-sound-effects/... <br/>
 https://freesound.org/ <br/>
 [애니메이션] <br/>
