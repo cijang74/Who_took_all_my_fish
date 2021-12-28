@@ -23,6 +23,12 @@ pygame.display.set_caption("누가 내 물고기 다 가져갔어?")
 clock = pygame.time.Clock()
 
 #각종 이미지 불러오기
+# 오프닝1 ######################################
+opening_background_image = pygame.image.load("images/opening_background.png").convert()
+opening_character_back_image = pygame.image.load("images/opening_character_back.png").convert()
+opening_character_angry_image = pygame.image.load("images/opening_character_angry.png").convert()
+opening_bucket_image = pygame.image.load("images/opening_bucket.png").convert()
+
 # 펭귄1 ########################################
 penguinR_image = [pygame.image.load("images/penguinR/1.png").convert(),
                      pygame.image.load("images/penguinR/2.png").convert(),
@@ -310,6 +316,9 @@ high_score = 0
 mapcounter = 1 #스테이지가 계속 호출되는 것을 막기 위한 변수
 last_trash_spawn_time = 0
 backCount = 0
+# 오프닝6 #####
+mapcounter = 2 #스테이지가 계속 호출되는 것을 막기 위한 변수
+###############
 
 # 투사체 발사 관련
 ggg = 0
@@ -492,11 +501,7 @@ class Character: #플레이어 클래스
             self.right = self.x + 125
 
             # 속도 줄여줌
-            if stage == 6:
-                self.v -= 0.09
-            
-            else:
-                self.v -= 0.2
+            self.v -= 0.2
 
             # 바닥에 닿았을때, 변수 리셋
             if self.y > screen_height - 360 and self.canMove_D == True:
@@ -914,7 +919,7 @@ class Stage: #스테이지 클래스
 
     def makeWall_sero(self, x, y, i, b_type):
         for z in range (0, i+1):   
-            walls.append(Wall(x, y + 80 * z, b_type))
+            walls.append(Wall(x, y - 80 * z, b_type))
 
     #각 스테이지들에서의 오브젝트 배치
 
@@ -924,7 +929,10 @@ class Stage: #스테이지 클래스
         textboxs.append(TextBox(30,620,"two"))
 
     def stage2(self):
-        screen.blit(stage_museum_ring, (0, 0))
+        # 오프닝5 ##############################
+        #screen.blit(stage_museum_ring, (0, 0))
+        screen.blit(opening_background_image, (0, 0))
+        ########################################
 
     def stage3(self):
         pass
@@ -976,6 +984,25 @@ class Button: #버튼 클래스
         else:
             screen.blit(img_in,(x,y))
 
+# 오프닝11 ##################################################3
+class Opening_Character :
+    def __init__(self, x, y) :
+        self.x = x
+        self.y = y
+
+        self.stay_time = 0
+        self.time_flg = True
+
+    def move(self) :
+        if self.time_flg :
+            self.stay_time = time.time()
+            self.time_flg = False
+        else :
+            if (time.time() - self.stay_time >= 2) :
+                self.x += 20
+    def draw(self) :
+        screen.blit(opening_character_angry_image, (self.x, self.y))
+        
 # 펭귄2 #######################################################################
 class Penguin:
     def __init__(self, x, y):   # x, y는 펭귄 초기 위치
@@ -1005,6 +1032,26 @@ class Penguin:
 
         # 펭귄 HP
         self.hp = 1
+
+    # 오프닝10 ###################################################
+        self.opening_speed = 2
+    def opening_move(self) :
+        if (self.isLeft and self.x <= 555) :
+            self.opening_speed = 10
+            self.isLeft = False
+            self.isRight = True
+            self.image_num = 0
+            self.image_time = time.time()
+        elif (self.isRight and self.x >= 1920) :
+            self.isLeft = True
+            self.isRight = False
+            self.image_num = 0
+            self.image_time = time.time()
+        if (self.isLeft) :
+            self.x -= self.opening_speed
+        elif(self.isRight) :
+            self.x += self.opening_speed
+    ##############################################################
 
     def move(self, min_x, max_x) :    # 이동 범위: min_x ~ max_x
         # 펭귄 범위 한정(710~1210), 방향 전환
@@ -1095,12 +1142,20 @@ isdead = False
 # 타이틀UI-1 ###########
 isRunning = True
 
+# 오프닝7 ########################################################
+opening_character_run = False
+opening_angry_flg = False
+opening_flg = True
+opening_angry = Opening_Character(300, 800)
+opening_penguin = Penguin(1920, 800)
+##################################################################
+
 # 펭귄3 ##########################################################
 penNum_stage3 = 2
 penNum_stage6 = 1
 penguin3 = Penguin(1050, 660) # 매개변수: 펭귄 초기 위치
 penguin3_2 = Penguin(960, 340)
-penguin6 = Penguin(960, 710)
+penguin6 = Penguin(960, 740)
 ##################################################################
 
 # 보스3 ##########################################################
@@ -1199,6 +1254,7 @@ while 1:
                     last_fire = 0
                     stage = 0
                     score = 0
+                    mapcounter = 2  # 오프닝7 #####
                     mapcounter = 1
                     missile_speed = 10
                     character = Character()
@@ -1222,8 +1278,9 @@ while 1:
         if stage == 1:
             screen.blit(stage_museum_no_ring, (0, 0))
             theif.draw()
-        if stage == 2:
-            screen.blit(stage_museum, (0, 0))
+        if stage == 2:  # 오프닝2 - 배경 ##################
+            screen.blit(opening_background_image, (0, 0))
+
         if stage == 3:
             screen.blit(stage_cave, (0, 0))
         if stage == 4:
@@ -1236,16 +1293,17 @@ while 1:
             screen.blit(stage_broken_museum, (0, 0))
         if stage == 8:
             screen.blit(clear_News, (0, 0))
-        
-        character.move(walls)
-        character.update()
+        # 오프닝8 #########################
+        if stage >= 3 :
+            character.move(walls)
+            character.draw()
+            character.update()
+        ###################################
 
         # 한 번만 체크하는거
         if stage == 1 and mapcounter == 1:
             start_time = time.time()
             Map.stage1()
-            Map.makeWall_garo(0, 1000, 24, "under")
-            Map.makeWall_garo(0, 920, 24, "normal")
             character.v = 2
             character.m = 1.2
             theif.x = 1500
@@ -1294,13 +1352,20 @@ while 1:
 
         if stage == 6 and mapcounter == 6:
             Map.stage6()
+            walls.clear()
 
-            Map.makeWall 
             Map.makeWall_garo(0, 1000, 24, "under")
             Map.makeWall_garo(0, 920, 24, "normal")
 
+            Map.makeWall_sero(320, 760, 0, "normal")
+            Map.makeWall_sero(640, 520, 0, "normal")
+            Map.makeWall_sero(800, 280, 0, "normal")
+
+            Map.makeWall_garo(1040, 280, 10, "normal")
+
             character.v = 2
             character.m = 1.2
+
             theif.x = 1500
             theif.y = screen_height - 300
             theif.hp = 10
@@ -1309,6 +1374,8 @@ while 1:
 
         if stage == 7 and mapcounter == 7:
             Map.stage7()
+            walls.clear()
+
             Map.makeWall_garo(0, 1000, 24, "under")
             Map.makeWall_garo(0, 920, 24, "normal")
             character.v = 2
@@ -1433,7 +1500,7 @@ while 1:
             # 스테이지2 ##############################################
             if penNum_stage6 > 0 :
                 if penguin6.hp != 0 :
-                    penguin6.move(710, 1210) # 이동 범위(x값)
+                    penguin6.move(710, 1800) # 이동 범위(x값)
                     penguin6.draw()
                     while tt < len(missiles): #미사일과 도둑이 닿으면 hp 1 감소
                         if penguin6.hit(missiles[tt]):
@@ -1444,6 +1511,14 @@ while 1:
                             del penguin6
                             penNum_stage6 -= 1
                         tt+=1
+
+            else:
+                screen.blit(portal_image, (1550, 180))
+                if character.x < 1720 and character.x > 1440: # 포탈 범위
+                    if pressed_keys[K_UP]:
+                        mapcounter = 7
+                        stage = 7
+                        character.respawn()
 
         if stage == 7:
              # 보스5 - 피격 #############################
@@ -1677,10 +1752,38 @@ while 1:
             screen.blit(heart_image, (10, 10))
             screen.blit(water_image, (150, 10))
             ################################################################
-            hp_str_text = font3.render('HP', True, (255,128,128))
-            screen.blit(hp_str_text, (10,10))
-            hp_text = font3.render(str(int(character.hp)), True, (255,128,128))
-            screen.blit(hp_text, (70,10))
+            # hp_str_text = font3.render('HP', True, (255,128,128))
+            # screen.blit(hp_str_text, (10,10))
+            # hp_text = font3.render(str(int(character.hp)), True, (255,128,128))
+            # screen.blit(hp_text, (70,10))
+
+        # 오프닝9 ########################
+        if stage == 2 :
+            if opening_flg and not(opening_angry_flg) and not(opening_character_run) :
+                screen.blit(opening_character_back_image, (300, 850))
+                if (opening_penguin.isLeft and opening_penguin.x <= 555) :
+                    del opening_bucket_image
+                elif (opening_penguin.isLeft and opening_penguin.x > 555) :
+                    screen.blit(opening_bucket_image, (425, 900))
+                opening_penguin.opening_move()
+                opening_penguin.draw()
+                if (opening_penguin.isRight and opening_penguin.x >= 1920) :
+                    del opening_penguin
+                    opening_angry_flg = True
+            elif opening_flg and opening_angry_flg and not(opening_character_run) :
+                del opening_character_back_image
+                opening_angry_flg = False
+                opening_character_run = True
+            elif opening_flg and not(opening_angry_flg) and opening_character_run :
+                opening_angry.move()
+                opening_angry.draw()
+                if opening_angry.x >= 1920 :
+                    opening_flg = False
+            else :
+                mapcounter = 3
+                stage = 3
+                
+        ##################################
 
         #캐릭터의 체력이 0이되어 게임 오버되었을 때 각종 게임 정보들 화면에 띄우기
         if character.hp <= 0:
