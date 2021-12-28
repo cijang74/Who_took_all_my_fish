@@ -29,14 +29,18 @@ penguinR_image = [pygame.image.load("images/penguinR/1.png").convert(),
                      pygame.image.load("images/penguinR/3.png").convert(),
                      pygame.image.load("images/penguinR/4.png").convert(),
                      pygame.image.load("images/penguinR/5.png").convert()]
+                     
 penguinL_image = [pygame.image.load("images/penguinL/1.png").convert(),
                      pygame.image.load("images/penguinL/2.png").convert(),
                      pygame.image.load("images/penguinL/3.png").convert(),
                      pygame.image.load("images/penguinL/4.png").convert(),
                      pygame.image.load("images/penguinL/5.png").convert()]
+
 for i in range(5) :
     penguinR_image[i] = pygame.transform.scale(penguinR_image[i], (125, 200))
+    penguinR_image[i].set_colorkey(RGB3)
     penguinL_image[i] = pygame.transform.scale(penguinL_image[i], (125, 200))
+    penguinL_image[i].set_colorkey(RGB3)
 
 ###############################################
 
@@ -58,13 +62,6 @@ heart_image = heart_images[0]
 water_image = water_images[0]
 ###############################################
 homescreen_image = pygame.image.load('images/homescreen.png').convert()
-
-one_image = pygame.image.load('images/1.png').convert()
-one_image.set_colorkey((0, 0, 0))
-two_image = pygame.image.load('images/2.png').convert()
-two_image.set_colorkey((0, 0, 0))
-three_image = pygame.image.load('images/3.png').convert()
-three_image.set_colorkey((0, 0, 0))
 
 clearscreen_image = pygame.image.load('images/clear.png').convert()
 howtoplay_image = pygame.image.load('images/How_to_play.png').convert()
@@ -165,12 +162,12 @@ theif_attack_image2.set_colorkey((0, 255, 0))
 missile_image = pygame.image.load('images/missile.png').convert()
 missile_image.set_colorkey((255, 255, 255))
 
-portal_image = pygame.image.load('images/test.png').convert()
-portal_image.set_colorkey((255, 255, 255))
+portal_image = pygame.image.load('images/portal.png').convert()
+portal_image.set_colorkey(RGB2)
 un_portal_image = pygame.image.load('images/un_act_portal.png').convert()
-un_portal_image.set_colorkey((255, 255, 255))
+un_portal_image.set_colorkey(RGB2)
 boss_portal_image = pygame.image.load('images/boss_portal.png').convert()
-boss_portal_image.set_colorkey((255, 255, 255))
+boss_portal_image.set_colorkey(RGB2)
 
 textbox_image = pygame.image.load('images/conText.png').convert()
 
@@ -201,15 +198,15 @@ space_trash_image.set_colorkey((255, 255, 255))
 space_trash2_image = pygame.image.load('images/space_trash2.png').convert()
 space_trash2_image.set_colorkey((255, 255, 255))
 
-stage_museum = pygame.image.load('images/museum.png').convert()
+stage_museum = pygame.image.load('images/museum_ring.png').convert()
 stage_museum_ring = pygame.image.load('images/museum_ring.png').convert()
-stage_museum_no_ring = pygame.image.load('images/museum_no_ring.png').convert()
-stage_cave = pygame.image.load('images/cave.png').convert()
-stage_broken_museum = pygame.image.load('images/museum_broken.png').convert()
-stage_space = pygame.image.load('images/space.png').convert()
-clear_News = pygame.image.load('images/News.png').convert()
-bad_News = pygame.image.load('images/bad_news.png').convert()
-Main_Buttun = pygame.image.load('images/Main.png').convert()
+stage_museum_no_ring = pygame.image.load('images/museum_ring.png').convert()
+stage_cave = pygame.image.load('images/museum_ring.png').convert()
+stage_broken_museum = pygame.image.load('images/museum_ring.png').convert()
+stage_space = pygame.image.load('images/museum_ring.png').convert()
+clear_News = pygame.image.load('images/museum_ring.png').convert()
+bad_News = pygame.image.load('images/museum_ring.png').convert()
+Main_Buttun = pygame.image.load('images/museum_ring.png').convert()
 Main_Buttun_rect = Main_Buttun.get_rect()
 
 ################################################################## 쌔삥
@@ -1092,15 +1089,17 @@ missiles = []
 boss_missiles = [] #배열로 여러개 만들것들
 cave_trashs = []
 space_trashs = []
+isdead = False
 ####################################################################
 #################################################################### 게임루프
 # 타이틀UI-1 ###########
 isRunning = True
 
 # 펭귄3 ##########################################################
-penNum_stage3 = 1
+penNum_stage3 = 2
 penNum_stage6 = 1
-penguin3 = Penguin(960, 710) # 매개변수: 펭귄 초기 위치
+penguin3 = Penguin(1050, 660) # 매개변수: 펭귄 초기 위치
+penguin3_2 = Penguin(960, 340)
 penguin6 = Penguin(960, 710)
 ##################################################################
 
@@ -1247,6 +1246,8 @@ while 1:
             Map.stage1()
             Map.makeWall_garo(0, 1000, 24, "under")
             Map.makeWall_garo(0, 920, 24, "normal")
+            character.v = 2
+            character.m = 1.2
             theif.x = 1500
             theif.y = screen_height - 300
             treasure_txt = False
@@ -1263,6 +1264,16 @@ while 1:
 
         if stage == 3 and mapcounter == 3:
             Map.stage3()
+            Map.makeWall_garo(0, 1000, 24, "under")
+            Map.makeWall_garo(0, 920, 14, "normal")
+            Map.makeWall_garo(1120, 920, 10, "under")
+            Map.makeWall_garo(1120, 840, 10, "normal")
+
+            Map.makeWall_garo(0, 520, 11, "normal")
+
+            character.v = 2
+            character.m = 1.2
+
             theif.x = 1500
             theif.y = screen_height - 300
             theif.hp = 10
@@ -1283,8 +1294,13 @@ while 1:
 
         if stage == 6 and mapcounter == 6:
             Map.stage6()
-            character.v = 6
-            character.m = 1.8
+
+            Map.makeWall 
+            Map.makeWall_garo(0, 1000, 24, "under")
+            Map.makeWall_garo(0, 920, 24, "normal")
+
+            character.v = 2
+            character.m = 1.2
             theif.x = 1500
             theif.y = screen_height - 300
             theif.hp = 10
@@ -1293,8 +1309,10 @@ while 1:
 
         if stage == 7 and mapcounter == 7:
             Map.stage7()
-            character.v = 1
-            character.m = 1
+            Map.makeWall_garo(0, 1000, 24, "under")
+            Map.makeWall_garo(0, 920, 24, "normal")
+            character.v = 2
+            character.m = 1.2
             theif.x = 1500
             theif.y = screen_height - 300
             theif.hp = 10
@@ -1339,12 +1357,8 @@ while 1:
         ####################################
 
         #스테이지 안내형 텍스트 박스 관련
-        if stage == 2:
-            if character.x < 350 and character.x > 200:
-                screen.blit(textboxs_guide1, (170, 620))
-                if pressed_keys[K_UP]:
-                    stage = 3
-                    character.respawn()
+        if stage == 3:
+            pass
 
         if stage == 4:
             if character.x < 970 and character.x > 820:
@@ -1375,29 +1389,40 @@ while 1:
         if stage == 3:
             # 펭귄4 ##################################################
             if penNum_stage3 > 0 :
-                if penguin3.hp != 0 :
-                    penguin3.move(710, 1210) # 이동 범위(x값)
-                    penguin3.draw()
+                if (isdead == False):
+                    if penguin3.hp != 0 :
+                        penguin3.move(1050, 1850) # 이동 범위(x값)
+                        penguin3.draw()
+                        while tt < len(missiles): #미사일과 도둑이 닿으면 hp 1 감소
+                            if penguin3.hit(missiles[tt]):
+                                del missiles[tt]
+                                penguin3.hp -= 1
+                                print(penguin3.hp)
+                                tt -= 1
+                                del penguin3
+                                penNum_stage3 -= 1
+                                isdead = True
+                            tt+=1
+
+                if penguin3_2.hp != 0 :
+                    penguin3_2.move(0, 600) # 이동 범위(x값)
+                    penguin3_2.draw()
                     while tt < len(missiles): #미사일과 도둑이 닿으면 hp 1 감소
-                        if penguin3.hit(missiles[tt]):
+                        if penguin3_2.hit(missiles[tt]):
                             del missiles[tt]
-                            penguin3.hp -= 1
-                            print(penguin3.hp)
+                            penguin3_2.hp -= 1
+                            print(penguin3_2.hp)
                             tt -= 1
-                            del penguin3
+                            del penguin3_2
                             penNum_stage3 -= 1
                         tt+=1
-            '''
-            if theif.x > character.x: #오른쪽 방향을 보게 해야함   
-                theif.draw2()
-
-            if theif.x < character.x: #왼쪽 방향을 보게 해야함
-                theif.draw()
-            
-            if time.time() - last_trash_spawn_time> 0.4+ ggg and spawn == True: # 쓰레기들 스폰
-                cave_trashs.append(Cave_Trash())
-                ggg -= 0.002
-                last_trash_spawn_time = time.time()'''
+            else:
+                screen.blit(portal_image, (200, 400))
+                if character.x < 600 and character.x > 200: # 포탈 범위
+                    if pressed_keys[K_UP]:
+                        stage = 6
+                        mapcounter = 6
+                        character.respawn()
             ##########################################################
 
         if stage == 4 and theif.y > 350:
@@ -1471,7 +1496,19 @@ while 1:
         #포탈 관련: 닿으면 캐릭터를 리스폰 위치로 옮기고 스테이지 1 증가
         # 스테이지1
         if character.x > 1920 - 140 and (stage == 1 or (stage == 3 and penNum_stage3 == 0) or (stage == 6 and penNum_stage6 == 0)): # 좌표 조건식으로 변경
-            stage += 1
+            if (stage == 1): 
+                mapcounter = 3
+                stage += 2
+
+            elif (stage == 3): 
+                mapcounter = 6
+                stage += 3
+
+            elif (stage == 6): 
+                mapcounter = 7
+                stage += 1
+
+              
             character.respawn()
             
             enemys.clear()
@@ -1770,4 +1807,6 @@ while 1:
     
     if (stage >= 1):
         character.draw()
+
+    print(stage)
     pygame.display.update() #화면 업데이트
