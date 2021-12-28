@@ -56,10 +56,9 @@ for i in range(5) :
 
 # 보스1 #######################################
 bossPenguin_image = pygame.image.load("images/bossPenguin_stay.png").convert()
+bossPenguin_image.set_colorkey(RGB3)
 bossPenguin_attack_image = pygame.image.load("images/bossPenguin_attack.png").convert()
-
-bossPenguin_image = pygame.transform.scale(bossPenguin_image, (470, 750))
-bossPenguin_attack_image = pygame.transform.scale(bossPenguin_attack_image, (470, 750))
+bossPenguin_attack_image.set_colorkey(RGB3)
 
 # UI1 #########################################
 # 충돌7 #####################################################################
@@ -68,13 +67,17 @@ heart_images = [pygame.image.load("images/heart/heart_1.png").convert(),
                 pygame.image.load("images/heart/heart_3.png").convert(),
                 pygame.image.load("images/heart/heart_4.png").convert()]
 #############################################################################
-water_images = [pygame.image.load("images/water/water_FULL.png").convert()]
+water_images = [pygame.image.load("images/water/water1_5.png").convert(),
+                pygame.image.load("images/water/water1_4.png").convert(),
+                pygame.image.load("images/water/water1_3.png").convert(),
+                pygame.image.load("images/water/water1_2.png").convert(),
+                pygame.image.load("images/water/water1_1.png").convert()]
 
 for i in range(len(heart_images)) :
     heart_images[i] = pygame.transform.scale(heart_images[i], (120, 120))
 
-heart_image = heart_images[0]
-water_image = water_images[0]
+heart_image = heart_images[3]
+water_image = water_images[4]
 ###############################################
 homescreen_image = pygame.image.load('images/homescreen.png').convert()
 
@@ -183,6 +186,10 @@ un_portal_image = pygame.image.load('images/un_act_portal.png').convert()
 un_portal_image.set_colorkey(RGB2)
 boss_portal_image = pygame.image.load('images/boss_portal.png').convert()
 boss_portal_image.set_colorkey(RGB2)
+
+well_image = pygame.image.load('images/well.png').convert()
+well_image.set_colorkey(RGB2)
+well_text_image = pygame.image.load('images/Text3.png').convert()
 
 textbox_image = pygame.image.load('images/conText.png').convert()
 
@@ -382,6 +389,7 @@ class Character: #플레이어 클래스
         self.character_speed = 5 #캐릭터 이동 속도(클 수록 빨라짐)
         self.damage = 0 #캐릭터 공격 추가 데미지(클 수록 강해짐)
         self.hp = 3 #캐릭터 체력
+        self.mp = 4
 
         self.last_time = time.time()
         self.punch_time = time.time()-5
@@ -556,11 +564,13 @@ class Character: #플레이어 클래스
         screen.blit(playerTexture, (self.x, self.y))
     
     def fire(self): #미사일 발사(총구의 방향에서 발사되게 조정해놓음)
+        self.mp -= 1
+
         if self.range == 0:
             missiles.append(Missile(self.x + 84, self.y + 64, self.range))
 
         if self.range == 180:
-            missiles.append(Missile(self.x+20, self.y + 64, self.range))
+            missiles.append(Missile(self.x + 20, self.y + 64, self.range))
 
 class Theif:
     def __init__(self,t):
@@ -974,8 +984,8 @@ class Stage: #스테이지 클래스
         pass     
 
     def stage7(self):
-        textboxs.append(TextBox(1400,620,"three"))
-        textboxs.append(TextBox(720,620,"four"))
+        pass
+
     def stage8(self):
         pass
 
@@ -1219,10 +1229,12 @@ while 1:
                 print("왼쪽 알트키 누름")
                 isJump=True
                 jumpAniTimer=time.time()
+
             if event.key==pygame.K_LSHIFT:
                 print("왼쪽 쉬프트키 누름")
-                isAttack=True
-                attackAniTimer=time.time()
+                if(character.mp>0):
+                    isAttack=True
+                    attackAniTimer=time.time()
 
         if event.type==pygame.KEYUP: #키 땠을 때
             if event.key==pygame.K_LEFT:
@@ -1244,8 +1256,9 @@ while 1:
             sys.exit() # X 누르면 나가기
 
         if event.type == KEYDOWN and event.key == K_LSHIFT:
-            if stage >= 1 and istext_on == False:
+            if stage >= 1 and istext_on == False and character.mp:
                 character.fire() # SPACE 누르면 총알 발사
+                water_image = water_images[character.mp]
                 pygame.mixer.Sound.play(shot_sound)
 
     #스테이지 설정들
@@ -1334,7 +1347,6 @@ while 1:
         # 오프닝8 #########################
         if stage >= 3 :
             character.move(walls)
-            character.draw()
             character.update()
         ###################################
 
@@ -1419,6 +1431,7 @@ while 1:
         if stage == 7 and mapcounter == 7:
             Map.stage7()
             walls.clear()
+            spawn = True
 
             Map.makeWall_garo(0, 1000, 24, "under")
             Map.makeWall_garo(0, 920, 24, "normal")
@@ -1459,17 +1472,6 @@ while 1:
                     del textboxs[t]
                     stop = time.time()
 
-        # 보스4 - 공격 준비 ################
-        if stage == 7 and t < len(textboxs):
-            textboxs[t].draw()
-            istext_on = True
-            if pressed_keys[K_z]:
-                if (time.time() - stop) > character.attac_speed:
-                    del textboxs[t]
-                    stop = time.time()
-                spawn = True
-        ####################################
-
         #스테이지 안내형 텍스트 박스 관련
         if stage == 3:
             pass
@@ -1497,6 +1499,7 @@ while 1:
                 theif.draw()
 
         if stage == 3:
+            screen.blit(well_image, (600, screen_height - 345))
             # 펭귄4 ##################################################
             if penNum_stage3 > 0 :
                 if (isdead == False):
@@ -1546,11 +1549,18 @@ while 1:
                         tt+=1
             else:
                 screen.blit(portal_image, (200, 400))
+
                 if character.x < 600 and character.x > 200: # 포탈 범위
                     if pressed_keys[K_UP]:
                         stage = 6
                         mapcounter = 6
                         character.respawn()
+
+            if character.x < 700 and character.x > 600:
+                if pressed_keys[K_z]:
+                    print("test")
+                    character.mp = 4
+                    water_image = water_images[character.mp]
             ##########################################################
 
         if stage == 4 and theif.y > 350:
@@ -1558,6 +1568,8 @@ while 1:
             theif.draw()
 
         if stage == 6:
+            screen.blit(well_image, (1600, screen_height - 345))
+
             # 스테이지2 ##############################################
             if penNum_stage6 > 0 :
                 # 충돌5 ##############################################
@@ -1590,7 +1602,14 @@ while 1:
                         stage = 7
                         character.respawn()
 
+            if character.x < 1700 and character.x > 1600:
+                if pressed_keys[K_z]:
+                    print("test")
+                    character.mp = 4
+                    water_image = water_images[character.mp]
+
         if stage == 7:
+            screen.blit(well_image, (575, screen_height - 345))
              # 보스5 - 피격 #############################
             if penNum_stage7 > 0 :
                 # 충돌11 ##################################
@@ -1611,6 +1630,11 @@ while 1:
                             print(bossPenguin.hp)
                             tt -= 1
                         tt+=1
+            if character.x < 700 and character.x > 400:
+                if pressed_keys[K_z]:
+                    print("test")
+                    character.mp = 4
+                    water_image = water_images[character.mp]
             ############################################
 
         if stage == 3:
@@ -1978,5 +2002,10 @@ while 1:
         else:
             isAttack=False
             playerTexture=playerTextureDefault
+    
+    if(stage >= 3):
+        character.draw()
+
+    print(character.x)
 
     pygame.display.update() #화면 업데이트
